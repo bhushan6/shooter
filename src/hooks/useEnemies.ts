@@ -1,7 +1,7 @@
 import { useFrame, useThree } from "@react-three/fiber";
 import { useRapier } from "@react-three/rapier";
 import { useMemo } from "react";
-import { Enemies } from "../components/Bullets";
+import { Enemies } from "../components/Enemies";
 
 export const useEnemies = () => {
   const { scene } = useThree();

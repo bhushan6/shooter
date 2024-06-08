@@ -5,6 +5,8 @@ export const direction = new THREE.Vector3();
 export const frontVector = new THREE.Vector3();
 export const sideVector = new THREE.Vector3();
 
+export const BULLET_FIRE_INTERVAL = 200;
+
 export const GROUND_SIZE = 50;
 
 export const BULLET_SIZE = {

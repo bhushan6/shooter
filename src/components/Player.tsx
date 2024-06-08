@@ -1,11 +1,5 @@
 import { ThreeElements, useFrame } from "@react-three/fiber";
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CapsuleCollider,
   RapierRigidBody,
@@ -15,6 +9,7 @@ import * as THREE from "three";
 import { useMovementControls } from "../hooks/useMovementControls";
 import { lookAt } from "../utils";
 import {
+  BULLET_FIRE_INTERVAL,
   GROUND_SIZE,
   MOVE_SPEED,
   direction,
@@ -24,57 +19,7 @@ import {
 import { Pathfinding } from "three-pathfinding";
 import { useBullets } from "../hooks/useBullets";
 import { useEnemies } from "../hooks/useEnemies";
-
-const BULLET_FIRE_INTERVAL = 200;
-
-interface GunMethods {
-  muzzleRef: React.RefObject<THREE.Group<THREE.Object3DEventMap>>;
-}
-
-const Gun = forwardRef<GunMethods, {}>((_, ref) => {
-  const muzzleRef = useRef<THREE.Group>(null);
-
-  useImperativeHandle<
-    {
-      muzzleRef: React.RefObject<THREE.Group<THREE.Object3DEventMap>>;
-    },
-    {
-      muzzleRef: React.RefObject<THREE.Group<THREE.Object3DEventMap>>;
-    }
-  >(
-    ref,
-    () => {
-      return {
-        muzzleRef,
-      };
-    },
-    []
-  );
-
-  return (
-    <>
-      <group>
-        <mesh
-          position={[1.5, 1.8, -0.5]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          castShadow
-        >
-          <boxGeometry attach="geometry" args={[0.5, 3, 0.5]} />
-          <meshStandardMaterial attach="material" color="black" />
-        </mesh>
-        <mesh position={[1.5, 1.5, 0.5]} castShadow>
-          <boxGeometry attach="geometry" args={[0.3, 1, 0.3]} />
-          <meshStandardMaterial attach="material" color="black" />
-        </mesh>
-        <group ref={muzzleRef} name="muzzle" position={[1.5, 1.75, -2]} />
-        <mesh position={[1.5, 1.75, -2]}>
-          <boxGeometry attach="geometry" args={[0.1, 0.1, 0.2]} />
-          <meshStandardMaterial attach="material" color="red" />
-        </mesh>
-      </group>
-    </>
-  );
-});
+import { Gun, GunMethods } from "./Gun";
 
 const pathfinding = new Pathfinding();
 const ZONE = "level1";
@@ -205,6 +150,17 @@ export const Player = (
               (0.5 - Math.random()) * 20
             ),
           });
+
+          // const tem = newBullet.direction.clone().negate().multiplyScalar(10);
+
+          // playerRef.current?.setLinvel(
+          //   {
+          //     x: tem.x,
+          //     y: 0,
+          //     z: tem.z,
+          //   },
+          //   true
+          // );
 
           bullets.addBullet(newBullet);
         }}
