@@ -4,7 +4,7 @@ import * as THREE from "three";
 import { GROUND_SIZE } from "../constant";
 import { useEffect, useRef } from "react";
 
-function createPlaneShapeFromMesh(mesh: THREE.Mesh, offset=2): THREE.Shape {
+function createPlaneShapeFromMesh(mesh: THREE.Mesh, offset = 2): THREE.Shape {
   // Compute the bounding box of the mesh
   const boundingBox = new THREE.Box3().setFromObject(mesh);
 
@@ -91,7 +91,7 @@ export const Ground = (
 
     scene.add(mesh);
 
-    mesh.material.wireframe = true
+    mesh.material.wireframe = true;
 
     props.setNavMesh(mesh);
 
@@ -112,14 +112,18 @@ export const Ground = (
           />
         </mesh>
       </RigidBody>
-      <mesh ref={ob} position={[-10, 2.5, 10]} >
-        <boxGeometry args={[5, 5, 15]} />
-        <meshStandardMaterial color={"green"} />
-      </mesh>
-      <mesh ref={ob2} position={[2, 2.5, 10]}>
-        <boxGeometry args={[15, 5, 5]} />
-        <meshStandardMaterial color={"green"} />
-      </mesh>
+      <RigidBody>
+        <mesh ref={ob} position={[-10, 2.5, 10]}>
+          <boxGeometry args={[5, 5, 15]} />
+          <meshStandardMaterial color={"green"} />
+        </mesh>
+      </RigidBody>
+      <RigidBody>
+        <mesh ref={ob2} position={[2, 2.5, 10]}>
+          <boxGeometry args={[15, 5, 5]} />
+          <meshStandardMaterial color={"green"} />
+        </mesh>
+      </RigidBody>
     </>
   );
 };

@@ -1,9 +1,8 @@
-import { ThreeElements, useFrame, useThree } from "@react-three/fiber";
+import { ThreeElements, useFrame } from "@react-three/fiber";
 import {
   forwardRef,
   useEffect,
   useImperativeHandle,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -11,7 +10,6 @@ import {
   CapsuleCollider,
   RapierRigidBody,
   RigidBody,
-  useRapier,
 } from "@react-three/rapier";
 import * as THREE from "three";
 import { useMovementControls } from "../hooks/useMovementControls";
@@ -24,52 +22,8 @@ import {
   sideVector,
 } from "../constant";
 import { Pathfinding } from "three-pathfinding";
-import { Bullets } from "./Bullets";
-
-const Bullet = ({
-  position,
-  direction,
-  id,
-}: {
-  position: THREE.Vector3;
-  direction: THREE.Vector3;
-  id: number;
-  setBullets: React.Dispatch<
-    React.SetStateAction<
-      {
-        id: number;
-        position: THREE.Vector3;
-        direction: THREE.Vector3;
-      }[]
-    >
-  >;
-}) => {
-  const bulletRef = useRef<THREE.Mesh>(null);
-
-  const directionVec = useRef(new THREE.Vector3(0, 0, 0));
-
-  useFrame(() => {
-    directionVec.current.copy(direction);
-    position.add(directionVec.current.multiplyScalar(0.5));
-    if (!bulletRef.current) return;
-    position.y = 1.75;
-    bulletRef.current.position.copy(position);
-  });
-
-  useEffect(() => {
-    if (!bulletRef.current) return;
-    const d = direction.clone().multiply(new THREE.Vector3(100, 1, 100));
-    d.y = 1.75;
-    bulletRef.current.lookAt(d);
-  }, []);
-
-  return (
-    <mesh ref={bulletRef} position={position}>
-      <boxGeometry attach="geometry" args={[0.4, 0.4, 0.6]} />
-      <meshStandardMaterial attach="material" color="red" />
-    </mesh>
-  );
-};
+import { useBullets } from "../hooks/useBullets";
+import { useEnemies } from "../hooks/useEnemies";
 
 const BULLET_FIRE_INTERVAL = 200;
 
@@ -122,7 +76,8 @@ const Gun = forwardRef<GunMethods, {}>((_, ref) => {
   );
 });
 
-let pathfinding = new Pathfinding();
+const pathfinding = new Pathfinding();
+const ZONE = "level1";
 
 export const Player = (
   props: ThreeElements["mesh"] & { navMesh: THREE.Mesh }
@@ -132,24 +87,11 @@ export const Player = (
 
   const gunRef = useRef<GunMethods>(null);
 
-  const {rapier, world} = useRapier();
+  const bullets = useBullets();
 
-  console.log(rapier.Ray, world);
-  
-
-  const { scene } = useThree();
-
-  const bullets = useMemo(() => {
-    return new Bullets(scene);
-  }, [scene]);
-
-  // const [bullets, setBullets] = useState<
-  //   { id: number; position: THREE.Vector3; direction: THREE.Vector3 }[]
-  // >([]);
+  const enemies = useEnemies();
 
   const lastTimeFired = useRef(0);
-
-  const ZONE = "level1";
 
   useEffect(() => {
     if (!playerRef.current || !playerMeshRef.current) return;
@@ -190,16 +132,12 @@ export const Player = (
     );
   });
 
-  useFrame(() => {
-    bullets.update();
-  });
-
   return (
     <>
       <RigidBody
         colliders={false}
         ref={playerRef}
-        enabledRotations={[false, true, false]}
+        enabledRotations={[false, false, false]}
       >
         <CapsuleCollider position={props.position} args={[1, 0.75]} />
         <group ref={playerMeshRef}>
@@ -258,23 +196,21 @@ export const Player = (
               .clone()
               .negate(),
           };
+
+          enemies.addEnemy({
+            id: Date.now(),
+            position: new THREE.Vector3(
+              (0.5 - Math.random()) * 20,
+              1.5,
+              (0.5 - Math.random()) * 20
+            ),
+          });
+
           bullets.addBullet(newBullet);
         }}
       >
         <planeGeometry attach="geometry" args={[GROUND_SIZE, GROUND_SIZE]} />
       </mesh>
-
-      {/* {bullets.map((bullet) => {
-        return (
-          <Bullet
-            key={bullet.id}
-            position={bullet.position}
-            direction={bullet.direction}
-            id={bullet.id}
-            setBullets={setBullets}
-          />
-        );
-      })} */}
 
       <>
         {path.map((p, i) => {
